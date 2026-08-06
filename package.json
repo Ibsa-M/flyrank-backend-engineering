@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "better-sqlite3": "^13.0.3",
     "express": "^5.2.1",
     "swagger-jsdoc": "^6.3.0",
     "swagger-ui-express": "^5.0.1"

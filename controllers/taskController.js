@@ -1,6 +1,6 @@
 const tasks = require('../models/taskModel');
 
-exports.getAllTasks = (req, res) => {
+const getAllTasks = (req, res) => {
     res.json(tasks);
 };
 const getTaskById = (req, res) => {
@@ -64,7 +64,7 @@ const deleteTask = (req, res) => {
 };
 
 module.exports ={
-  getAllTasks: exports.getAllTasks,
+  getAllTasks,
   getTaskById,
   createTask,
   updateTask,

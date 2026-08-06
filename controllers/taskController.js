@@ -17,6 +17,11 @@ const getTaskById = (req, res) => {
     res.json(task);
 };
 const createTask = (req, res) => {
+    if (!req.body.title || req.body.title.trim() === '') {
+    return res.status(400).json({
+        message: 'Title is required'
+    });
+}
     const newTask = {
         id: tasks.length + 1,
         title: req.body.title,
@@ -29,6 +34,7 @@ const createTask = (req, res) => {
 };
 
 const updateTask = (req, res) => {
+
     const taskId = parseInt(req.params.id);
 
     const task = tasks.find(task => task.id === taskId);
@@ -36,6 +42,12 @@ const updateTask = (req, res) => {
     if (!task) {
         return res.status(404).json({
             message: 'Task not found'
+        });
+    }
+
+    if (typeof req.body.completed !== 'boolean') {
+        return res.status(400).json({
+            message: 'completed must be true or false'
         });
     }
 
@@ -57,10 +69,7 @@ const deleteTask = (req, res) => {
 
     const deletedTask = tasks.splice(taskIndex, 1);
 
-    res.json({
-        message: 'Task deleted successfully',
-        task: deletedTask[0]
-    });
+    res.status(200).send();
 };
 
 module.exports ={

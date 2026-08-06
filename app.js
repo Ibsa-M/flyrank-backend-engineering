@@ -8,13 +8,27 @@ const swaggerSpec = require("./swagger");
 const taskRoutes = require('./routes/taskRoutes');
 app.use('/tasks', taskRoutes);
 app.get('/', (req, res) => {
-    res.json({ message: 'Hello!' });
+    res.json({
+        name: 'Task API',
+        version: '1.0',
+        endpoints: [
+            '/tasks',
+            '/health',
+            '/docs'
+        ]
+    });
 });
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/health', (req, res) => {
+    res.json({
+        status: 'ok'
+    });
+});
+
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const PORT = 3000;
 
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}/api-docs`);
+    console.log(`Server is running on http://localhost:${PORT}/docs`);
 });

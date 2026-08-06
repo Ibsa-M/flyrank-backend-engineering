@@ -1,5 +1,9 @@
 # First CRUD API
 
+## Description
+
+A RESTful CRUD API built with Express.js.
+
 ## Installation
 
 npm install
@@ -8,9 +12,9 @@ npm install
 
 node app.js
 
-## Swagger
+## API Documentation
 
-http://localhost:3000/api-docs
+http://localhost:3000/docs
 
 ## Endpoints
 
@@ -19,3 +23,10 @@ GET /tasks/:id
 POST /tasks
 PUT /tasks/:id
 DELETE /tasks/:id
+GET /health
+
+## Technologies
+
+- Node.js
+- Express.js
+- Swagger UI

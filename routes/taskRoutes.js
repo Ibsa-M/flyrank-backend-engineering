@@ -29,6 +29,51 @@ const taskController = require('../controllers/taskController');
  *       404:
  *         description: Task not found
  */
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   put:
+ *     summary: Update task by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               completed:
+ *                 type: boolean
+ *     responses:
+ *       200:
+ *         description: Returns the updated task
+ *       404:
+ *         description: Task not found
+ *       400:
+ *         description: Invalid request body
+ */
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Delete task by ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *     responses:
+ *       200:
+ *         description: Task deleted successfully
+ *       404:
+*         description: Task not found
+ */
 
 router.get('/', taskController.getAllTasks);
 router.get('/:id', taskController.getTaskById);

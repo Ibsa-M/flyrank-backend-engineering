@@ -1,12 +1,21 @@
 # First CRUD API
 
-My first CRUD API built during the FlyRank Backend Engineering Internship.
+## Installation
 
-## Tech Stack
+npm install
 
-- Node.js
-- Express.js (coming soon)
+## Run
 
-## Status
+node app.js
 
-🚧 In Progress
+## Swagger
+
+http://localhost:3000/api-docs
+
+## Endpoints
+
+GET /tasks
+GET /tasks/:id
+POST /tasks
+PUT /tasks/:id
+DELETE /tasks/:id

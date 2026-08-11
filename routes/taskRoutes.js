@@ -29,6 +29,7 @@ const taskController = require('../controllers/taskController');
  *       404:
  *         description: Task not found
  */
+
 /**
  * @swagger
  * /tasks/{id}:
@@ -57,6 +58,28 @@ const taskController = require('../controllers/taskController');
  *       400:
  *         description: Invalid request body
  */
+
+/**
+ * @swagger
+ * /tasks:
+ *   post:
+ *     summary: Create a new task
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Returns the created task
+ *       400:
+ *         description: Invalid request body
+ */
+
 /**
  * @swagger
  * /tasks/{id}:

@@ -1,5 +1,7 @@
+require('dotenv').config();
 const express = require('express');
 const app = express();
+const supabase = require('./config/supabase');
 app.use(express.json());
 
 const swaggerUi = require("swagger-ui-express");
@@ -27,7 +29,7 @@ app.get('/health', (req, res) => {
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}/docs`);

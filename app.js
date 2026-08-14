@@ -38,11 +38,50 @@ app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}/docs`);
 });
 
+/**
+ * @swagger
+ * /public/info:
+ *   get:
+ *     summary: Get public information
+ *     tags: [Public]
+ *     responses:
+ *       200:
+ *         description: Public information
+ */
+
 app.get('/public/info', (req, res) => {
     res.json({
         message: 'This is a public route'
     });
 });
+/**
+ * @swagger
+ * /protected/profile:
+ *   get:
+ *     summary: Get authenticated user profile
+ *     tags: [Protected]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Authenticated user profile
+ *       401:
+ *         description: Missing, invalid, or expired token
+ */
+/**
+ * @swagger
+ * /protected/dashboard:
+ *   get:
+ *     summary: Access protected dashboard
+ *     tags: [Protected]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Protected dashboard
+ *       401:
+ *         description: Missing, invalid, or expired token
+ */
 
 app.get('/protected/profile', requireAuth, (req, res) => {
     res.json({

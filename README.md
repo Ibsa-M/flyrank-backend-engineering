@@ -93,7 +93,7 @@ first-crud-api/
 ├── package-lock.json
 ├── README.md
 └── swagger.js
-
+```
 ## Swagger UI
 
 The API documentation is available through Swagger UI at:

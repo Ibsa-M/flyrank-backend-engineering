@@ -8,6 +8,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
 
 const taskRoutes = require('./routes/taskRoutes');
+app.use('/auth', require('./routes/authRoutes'));
 app.use('/tasks', taskRoutes);
 app.get('/', (req, res) => {
     res.json({
@@ -15,6 +16,7 @@ app.get('/', (req, res) => {
         version: '1.0',
         endpoints: [
             '/tasks',
+            '/auth',
             '/health',
             '/docs'
         ]

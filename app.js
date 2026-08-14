@@ -36,3 +36,23 @@ const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}/docs`);
 });
+
+app.get('/public/info', (req, res) => {
+    res.json({
+        message: 'This is a public route'
+    });
+});
+
+app.get('/protected/profile', (req, res) => {
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({
+            error: 'Authorization token required'
+        });
+    }
+
+    res.json({
+        message: 'You reached the protected profile route'
+    });
+});

@@ -146,8 +146,8 @@ router.post("/logout", async (req, res) => {
         });
     }
 
-    res.status(200).json({
-        message: "Logout successful"
+    res.status(204).json({
+        message: "No Content"
     });
 });
 

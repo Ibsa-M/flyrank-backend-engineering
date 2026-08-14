@@ -1,34 +1,97 @@
-# First CRUD API
+# FlyRank Backend Engineering API
 
-## Description
+A RESTful backend API built with Node.js and Express.js as part of the
+FlyRank Backend Engineering internship.
 
-A RESTful CRUD API built with Express.js.
+The project started as a CRUD API and was progressively extended with
+database persistence, PostgreSQL, Docker, Supabase Authentication,
+JWT verification, protected routes, reusable authentication middleware,
+and Swagger API documentation.
 
-## Installation
+---
 
-npm install
+## Overview
 
-## Run
+This project demonstrates a backend API built progressively through the
+FlyRank Backend Engineering assignments.
 
-node app.js
+The current authentication implementation uses **Supabase Auth** as the
+Identity Provider. Supabase manages user accounts, passwords, and signed
+JWT access tokens. The Express backend is responsible for receiving,
+verifying, and using those tokens to protect user-only routes.
 
-## API Documentation
+### Main capabilities
 
-http://localhost:3000/docs
+- RESTful CRUD operations
+- PostgreSQL database integration
+- Docker-based database environment
+- Supabase Authentication
+- User signup
+- User login
+- JWT access-token verification
+- Bearer token authentication
+- Reusable Express authentication middleware
+- Protected API routes
+- Public API routes
+- Logout
+- Swagger UI documentation
+- Environment-based configuration
 
-## Endpoints
+---
 
-GET /tasks
+## Tech Stack
 
-GET /tasks/:id
+| Technology | Purpose |
+|---|---|
+| Node.js | JavaScript runtime |
+| Express.js | Web framework |
+| Supabase Auth | Authentication and JWT issuing |
+| PostgreSQL | Persistent database |
+| Docker | Containerized environment |
+| Swagger UI | Interactive API documentation |
+| swagger-jsdoc | OpenAPI specification generation |
+| dotenv | Environment variable loading |
+| `@supabase/supabase-js` | Supabase JavaScript SDK |
+| `pg` | PostgreSQL client |
 
-POST /tasks
-PUT /tasks/:id
-DELETE /tasks/:id
-GET /health
+---
 
-## Technologies
+# Project Structure
 
-- Node.js
-- Express.js
-- Swagger UI
+```text
+first-crud-api/
+│
+├── config/
+│   └── supabase.js
+│
+├── controllers/
+│   └── taskController.js
+│
+├── docs/
+│   └── swagger-auth.png
+│
+├── middleware/
+│   └── authMiddleware.js
+│
+├── models/
+│
+├── repositories/
+│   └── taskRepository.js
+│
+├── routes/
+│   ├── authRoutes.js
+│   └── taskRoutes.js
+│
+├── .env
+├── .env.example
+├── .gitignore
+├── app.js
+├── database.js
+├── docker-compose.yml
+├── Dockerfile
+├── package.json
+├── package-lock.json
+├── README.md
+└── swagger.js
+
+![Swagger UI](docs/swagger-auth.png)

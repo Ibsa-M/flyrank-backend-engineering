@@ -94,4 +94,12 @@ first-crud-api/
 ├── README.md
 └── swagger.js
 
+## Swagger UI
+
+The API documentation is available through Swagger UI at:
+
+`http://localhost:3000/docs`
+
+### Swagger Screenshot
+
 ![Swagger UI](docs/swagger-auth.png)

@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const app = express();
 const supabase = require('./config/supabase');
+const requireAuth = require('./middleware/authMiddleware');
 app.use(express.json());
 
 const swaggerUi = require("swagger-ui-express");
@@ -43,27 +44,16 @@ app.get('/public/info', (req, res) => {
     });
 });
 
-app.get('/protected/profile', async (req, res) => {
-    const authHeader = req.headers.authorization;
-
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({
-            error: 'Authorization token required'
-        });
-    }
-
-    const token = authHeader.split(' ')[1];
-
-    const { data, error } = await supabase.auth.getUser(token);
-
-    if (error || !data.user) {
-        return res.status(401).json({
-            error: 'Invalid or expired token'
-        });
-    }
-
+app.get('/protected/profile', requireAuth, (req, res) => {
     res.json({
         message: 'Protected profile',
-        user: data.user
+        user: req.user
+    });
+});
+
+app.get('/protected/dashboard', requireAuth, (req, res) => {
+    res.json({
+        message: 'Protected dashboard',
+        user: req.user
     });
 });

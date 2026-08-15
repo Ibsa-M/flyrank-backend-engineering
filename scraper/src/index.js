@@ -1,7 +1,8 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
-const { fetchDetailPages } = require("./fetchDetails");
 
+const { fetchDetailPages } = require("./fetchDetails");
+const {parseBook} = require("./parseBook");
 const { discoverBookUrls } = require("./discover");
 
 const BASE_URL = "https://books.toscrape.com/";
@@ -108,6 +109,22 @@ async function main() {
   console.log(`book_urls=${bookUrls.length}`);
 
   const results = await fetchDetailPages(bookUrls);
+  const records = [];
+
+for (const result of results) {
+  if (result.error || !result.html) {
+    continue;
+  }
+
+  try {
+    const record = parseBook(result.html, result.url);
+    records.push(record);
+  } catch (error) {
+    console.error(
+      `PARSE ERROR: ${result.url} - ${error.message}`
+    );
+  }
+}
 
   const fetched = results.filter(
     (result) => !result.cached && !result.error
@@ -121,13 +138,32 @@ async function main() {
     (result) => result.error
   ).length;
 
+  console.log(`parsed=${records.length}`);
   console.log(`detail_urls=${bookUrls.length}`);
   console.log(`fetched=${fetched}`);
   console.log(`cache_hits=${cacheHits}`);
   console.log(`failures=${failures}`);
+
+  const invalidRecords = records.filter(
+  (record) =>
+    !record.title ||
+    !record.product_url ||
+    !record.price_text ||
+    typeof record.price_gbp !== "number" ||
+    !record.availability_text ||
+    !record.rating_text ||
+    typeof record.rating !== "number" ||
+    !record.description ||
+    !record.source_page ||
+    !record.fetched_at
+);
+
+console.log(`records=${records.length}`);
+console.log(`invalid_records=${invalidRecords.length}`);
 }
 
 main().catch((error) => {
   console.error("Fatal error:", error);
   process.exitCode = 1;
 });
+

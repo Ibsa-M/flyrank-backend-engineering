@@ -1,5 +1,6 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const { fetchDetailPages } = require("./fetchDetails");
 
 const { discoverBookUrls } = require("./discover");
 
@@ -105,9 +106,28 @@ async function main() {
   const bookUrls = await discoverBookUrls();
 
   console.log(`book_urls=${bookUrls.length}`);
+
+  const results = await fetchDetailPages(bookUrls);
+
+  const fetched = results.filter(
+    (result) => !result.cached && !result.error
+  ).length;
+
+  const cacheHits = results.filter(
+    (result) => result.cached
+  ).length;
+
+  const failures = results.filter(
+    (result) => result.error
+  ).length;
+
+  console.log(`detail_urls=${bookUrls.length}`);
+  console.log(`fetched=${fetched}`);
+  console.log(`cache_hits=${cacheHits}`);
+  console.log(`failures=${failures}`);
 }
 
 main().catch((error) => {
-  console.error(`ERROR: ${error.message}`);
+  console.error("Fatal error:", error);
   process.exitCode = 1;
 });

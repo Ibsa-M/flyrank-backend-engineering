@@ -1,18 +1,22 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 
-const TARGET_URL = "https://books.toscrape.com/";
-const CACHE_FILE = path.join(
-  __dirname,
-  "..",
-  "cache",
-  "catalogue-page-1.html"
-);
+const { discoverBookUrls } = require("./discover");
+
+const BASE_URL = "https://books.toscrape.com/";
+const CACHE_DIR = path.join(__dirname, "..", "cache");
 
 const USER_AGENT =
   "FlyRank-PoliteScraper/1.0 (+https://github.com/Ibsa-M/flyrank-backend-engineering)";
 
 const REQUEST_TIMEOUT_MS = 10000;
+
+function getCacheFile(pageNumber) {
+  return path.join(
+    CACHE_DIR,
+    `catalogue-page-${pageNumber}.html`
+  );
+}
 
 async function fetchWithTimeout(url) {
   const controller = new AbortController();
@@ -41,11 +45,13 @@ async function fetchWithTimeout(url) {
   }
 }
 
-async function getCataloguePage() {
-  try {
-    const cachedHtml = await fs.readFile(CACHE_FILE, "utf8");
+async function getCataloguePage(url, pageNumber) {
+  const cacheFile = getCacheFile(pageNumber);
 
-    console.log(`CACHE HIT: ${CACHE_FILE}`);
+  try {
+    const cachedHtml = await fs.readFile(cacheFile, "utf8");
+
+    console.log(`CACHE HIT: page=${pageNumber}`);
     console.log(`bytes=${Buffer.byteLength(cachedHtml, "utf8")}`);
 
     return cachedHtml;
@@ -55,23 +61,50 @@ async function getCataloguePage() {
     }
   }
 
-  console.log(`FETCH: ${TARGET_URL}`);
+  console.log(`FETCH: page=${pageNumber} ${url}`);
 
-  const response = await fetchWithTimeout(TARGET_URL);
+  const response = await fetchWithTimeout(url);
   const html = await response.text();
 
-  await fs.mkdir(path.dirname(CACHE_FILE), { recursive: true });
-  await fs.writeFile(CACHE_FILE, html, "utf8");
+  await fs.mkdir(CACHE_DIR, { recursive: true });
+  await fs.writeFile(cacheFile, html, "utf8");
 
   console.log(`status=${response.status}`);
   console.log(`bytes=${Buffer.byteLength(html, "utf8")}`);
-  console.log(`saved=${CACHE_FILE}`);
+  console.log(`saved=${cacheFile}`);
 
   return html;
 }
 
 async function main() {
-  await getCataloguePage();
+  let currentPageUrl = BASE_URL;
+
+  for (let pageNumber = 1; pageNumber <= 3; pageNumber++) {
+    const html = await getCataloguePage(
+      currentPageUrl,
+      pageNumber
+    );
+
+    if (pageNumber < 3) {
+      const $ = require("cheerio").load(html);
+      const nextHref = $("li.next a").attr("href");
+
+      if (!nextHref) {
+        throw new Error(
+          `Could not find next page after page ${pageNumber}`
+        );
+      }
+
+      currentPageUrl = new URL(
+        nextHref,
+        currentPageUrl
+      ).href;
+    }
+  }
+
+  const bookUrls = await discoverBookUrls();
+
+  console.log(`book_urls=${bookUrls.length}`);
 }
 
 main().catch((error) => {

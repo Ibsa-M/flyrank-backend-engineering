@@ -1,6 +1,15 @@
 # The Polite Scraper
 
-A small Node.js scraping pipeline built for FlyRank Backend Track — Week 5, Assignment A9.
+A small Node.js web-scraping pipeline built for the FlyRank Backend
+Engineering internship — Week 5, Assignment A9.
+
+The scraper collects structured book information from **Books to Scrape**,
+a public practice website designed specifically for learning and practicing
+web scraping.
+
+The implementation focuses on a limited scraping scope, caching,
+request timeouts, retry behavior, data normalization, validation, and
+responsible request behavior.
 
 ## Target Classification
 
@@ -11,6 +20,8 @@ A small Node.js scraping pipeline built for FlyRank Backend Track — Week 5, As
 ### Why this target?
 
 Books to Scrape is a public practice sandbox created specifically for learning and practicing web scraping.
+
+This makes it appropriate for the assignment's scraping exercise.
 
 ### Scope
 
@@ -49,5 +60,15 @@ A missing `robots.txt` is not treated as permission to scrape. The target is app
 ### Responsible scraping
 
 The scraper will be limited to the assignment's three catalogue pages and will use polite request behavior, including an identifying User-Agent, request timeout, caching during development, and a delay between real requests.
+
+---
+
+## How to Run
+
+From the `scraper/` directory:
+
+```bash
+node src/index.js
+
 
 > I will not reuse this code on another site without checking its rules and terms first.

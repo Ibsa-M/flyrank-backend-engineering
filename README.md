@@ -6,7 +6,7 @@ FlyRank Backend Engineering internship.
 The project started as a CRUD API and was progressively extended with
 database persistence, PostgreSQL, Docker, Supabase Authentication,
 JWT verification, protected routes, reusable authentication middleware,
-and Swagger API documentation.
+Swagger API documentation, and a polite web-scraping pipeline.
 
 ---
 
@@ -19,6 +19,10 @@ The current authentication implementation uses **Supabase Auth** as the
 Identity Provider. Supabase manages user accounts, passwords, and signed
 JWT access tokens. The Express backend is responsible for receiving,
 verifying, and using those tokens to protect user-only routes.
+
+The project was later extended with a separate web-scraping pipeline for
+the Week 5 assignment. The scraper targets Books to Scrape, a public
+practice website designed for learning web scraping.
 
 ### Main capabilities
 
@@ -36,6 +40,15 @@ verifying, and using those tokens to protect user-only routes.
 - Logout
 - Swagger UI documentation
 - Environment-based configuration
+- Polite web scraping
+- HTML caching
+- Book URL discovery
+- Book detail-page fetching
+- Retry and timeout handling
+- Book data parsing and normalization
+- Record validation
+- JSON output generation
+- Scraper execution reporting
 
 ---
 
@@ -53,6 +66,7 @@ verifying, and using those tokens to protect user-only routes.
 | dotenv | Environment variable loading |
 | `@supabase/supabase-js` | Supabase JavaScript SDK |
 | `pg` | PostgreSQL client |
+| Cheerio | HTML parsing for the scraper |
 
 ---
 
@@ -82,6 +96,25 @@ first-crud-api/
 │   ├── authRoutes.js
 │   └── taskRoutes.js
 │
+├── scraper/
+│   ├── src/
+│   │   ├── discover.js
+│   │   ├── fetchDetails.js
+│   │   ├── fetchPages.js
+│   │   ├── index.js
+│   │   └── parseBook.js
+│   │
+│   ├── cache/
+│   │   ├── details/
+│   │   └── catalogue-page-*.html
+│   │
+│   ├── output/
+│   │   ├── books.json
+│   │   └── run-report.json
+│   │
+│   ├── .gitignore
+│   └── README.md
+│
 ├── .env
 ├── .env.example
 ├── .gitignore
@@ -93,7 +126,8 @@ first-crud-api/
 ├── package-lock.json
 ├── README.md
 └── swagger.js
-```
+
+
 ## Swagger UI
 
 The API documentation is available through Swagger UI at:

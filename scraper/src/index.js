@@ -1,9 +1,11 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
-
-const { fetchDetailPages } = require("./fetchDetails");
 const {parseBook} = require("./parseBook");
 const { discoverBookUrls } = require("./discover");
+
+const OUTPUT_DIR = path.join(__dirname, "..", "output");
+const BOOKS_FILE = path.join(OUTPUT_DIR, "books.json");
+const REPORT_FILE = path.join(OUTPUT_DIR, "run-report.json");
 
 const BASE_URL = "https://books.toscrape.com/";
 const CACHE_DIR = path.join(__dirname, "..", "cache");
@@ -79,6 +81,9 @@ async function getCataloguePage(url, pageNumber) {
 }
 
 async function main() {
+  const startedAt = new Date();
+  const startedAtMs = Date.now();
+
   let currentPageUrl = BASE_URL;
 
   for (let pageNumber = 1; pageNumber <= 3; pageNumber++) {
@@ -109,22 +114,50 @@ async function main() {
   console.log(`book_urls=${bookUrls.length}`);
 
   const results = await fetchDetailPages(bookUrls);
-  const records = [];
+    const records = [];
 
-for (const result of results) {
-  if (result.error || !result.html) {
-    continue;
+  for (const result of results) {
+    if (result.error || !result.html) {
+      continue;
+    }
+
+    try {
+      const record = parseBook(result.html, result.url);
+      records.push(record);
+    } catch (error) {
+      console.error(
+        `PARSE ERROR: ${result.url} - ${error.message}`
+      );
+    }
   }
 
-  try {
-    const record = parseBook(result.html, result.url);
-    records.push(record);
-  } catch (error) {
-    console.error(
-      `PARSE ERROR: ${result.url} - ${error.message}`
-    );
-  }
-}
+  const invalidRecords = records.filter(
+    (record) =>
+      !record.title ||
+      !record.product_url ||
+      !record.price_text ||
+      typeof record.price_gbp !== "number" ||
+      !record.availability_text ||
+      !record.rating_text ||
+      typeof record.rating !== "number" ||
+      !record.description ||
+      !record.source_page ||
+      !record.fetched_at
+  );
+
+  const validRecords = records.filter(
+    (record) =>
+      record.title &&
+      record.product_url &&
+      record.price_text &&
+      typeof record.price_gbp === "number" &&
+      record.availability_text &&
+      record.rating_text &&
+      typeof record.rating === "number" &&
+      record.description &&
+      record.source_page &&
+      record.fetched_at
+  );
 
   const fetched = results.filter(
     (result) => !result.cached && !result.error
@@ -138,28 +171,41 @@ for (const result of results) {
     (result) => result.error
   ).length;
 
-  console.log(`parsed=${records.length}`);
+  const durationMs = Date.now() - startedAtMs;
+
+  await fs.mkdir(OUTPUT_DIR, { recursive: true });
+
+  await fs.writeFile(
+    BOOKS_FILE,
+    JSON.stringify(validRecords, null, 2),
+    "utf8"
+  );
+
+  const report = {
+    started_at: startedAt.toISOString(),
+    duration_ms: durationMs,
+    pages_fetched: fetched,
+    cache_hits: cacheHits,
+    valid_records: validRecords.length,
+    invalid_records: invalidRecords.length,
+    failed_pages: failures,
+  };
+
+  await fs.writeFile(
+    REPORT_FILE,
+    JSON.stringify(report, null, 2),
+    "utf8"
+  );
+
   console.log(`detail_urls=${bookUrls.length}`);
   console.log(`fetched=${fetched}`);
   console.log(`cache_hits=${cacheHits}`);
   console.log(`failures=${failures}`);
-
-  const invalidRecords = records.filter(
-  (record) =>
-    !record.title ||
-    !record.product_url ||
-    !record.price_text ||
-    typeof record.price_gbp !== "number" ||
-    !record.availability_text ||
-    !record.rating_text ||
-    typeof record.rating !== "number" ||
-    !record.description ||
-    !record.source_page ||
-    !record.fetched_at
-);
-
-console.log(`records=${records.length}`);
-console.log(`invalid_records=${invalidRecords.length}`);
+  console.log(`records=${records.length}`);
+  console.log(`valid_records=${validRecords.length}`);
+  console.log(`invalid_records=${invalidRecords.length}`);
+  console.log(`books_file=${BOOKS_FILE}`);
+  console.log(`report_file=${REPORT_FILE}`);
 }
 
 main().catch((error) => {

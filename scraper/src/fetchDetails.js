@@ -9,6 +9,7 @@ const USER_AGENT =
 
 const REQUEST_TIMEOUT_MS = 10000;
 const REQUEST_DELAY_MS = 1000;
+const RETRY_DELAY_MS = 1000;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -39,16 +40,22 @@ async function fetchWithTimeout(url) {
       signal: controller.signal,
     });
 
-    if (!response.ok) {
-      throw new Error(
-        `HTTP ${response.status} ${response.statusText}`
-      );
-    }
-
     return response;
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function shouldRetry(error) {
+  if (error.name === "AbortError") {
+    return true;
+  }
+
+  if (error.status >= 500 && error.status <= 599) {
+    return true;
+  }
+
+  return false;
 }
 
 async function fetchDetailPage(url, index, total) {
@@ -68,6 +75,7 @@ async function fetchDetailPage(url, index, total) {
       url,
       html,
       cached: true,
+      attempts: 0,
     };
   } catch (error) {
     if (error.code !== "ENOENT") {
@@ -75,43 +83,79 @@ async function fetchDetailPage(url, index, total) {
     }
   }
 
-console.log(
-  `[${new Date().toISOString()}] FETCH ${index}/${total}: ${url}`
-);
-  const startedAt = Date.now();
-
-  try {
-    const response = await fetchWithTimeout(url);
-    const html = await response.text();
-
-    await fs.mkdir(CACHE_DIR, { recursive: true });
-    await fs.writeFile(cacheFile, html, "utf8");
-
-    const durationMs = Date.now() - startedAt;
-
+  for (let attempt = 1; attempt <= 2; attempt++) {
     console.log(
-      `SUCCESS ${index}/${total}: status=${response.status} bytes=${Buffer.byteLength(
+      `[${new Date().toISOString()}] FETCH ${index}/${total} attempt=${attempt}: ${url}`
+    );
+
+    const startedAt = Date.now();
+
+    try {
+      const response = await fetchWithTimeout(url);
+
+      if (!response.ok) {
+        const error = new Error(
+          `HTTP ${response.status} ${response.statusText}`
+        );
+
+        error.status = response.status;
+
+        if (!shouldRetry(error) || attempt === 2) {
+          throw error;
+        }
+
+        console.log(
+          `RETRY ${index}/${total}: status=${response.status} waiting=${RETRY_DELAY_MS}ms`
+        );
+
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+
+      const html = await response.text();
+
+      await fs.mkdir(CACHE_DIR, { recursive: true });
+      await fs.writeFile(cacheFile, html, "utf8");
+
+      const durationMs = Date.now() - startedAt;
+
+      console.log(
+        `SUCCESS ${index}/${total}: status=${response.status} bytes=${Buffer.byteLength(
+          html,
+          "utf8"
+        )} duration_ms=${durationMs} attempts=${attempt}`
+      );
+
+      return {
+        url,
         html,
-        "utf8"
-      )} duration_ms=${durationMs}`
-    );
+        cached: false,
+        attempts: attempt,
+      };
+    } catch (error) {
+      const retryable = shouldRetry(error);
 
-    return {
-      url,
-      html,
-      cached: false,
-    };
-  } catch (error) {
-    console.error(
-      `ERROR ${index}/${total}: ${url} - ${error.message}`
-    );
+      if (retryable && attempt === 1) {
+        console.log(
+          `RETRY ${index}/${total}: ${error.message} waiting=${RETRY_DELAY_MS}ms`
+        );
 
-    return {
-      url,
-      html: null,
-      cached: false,
-      error: error.message,
-    };
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+
+      console.error(
+        `FAILED ${index}/${total}: ${url} - ${error.message}`
+      );
+
+      return {
+        url,
+        html: null,
+        cached: false,
+        attempts: attempt,
+        error: error.message,
+      };
+    }
   }
 }
 

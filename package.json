@@ -1,6 +1,5 @@
 {
   "type": "module",
-  "name": "scraper",
   "dependencies": {
     "@supabase/supabase-js": "^2.112.3",
     "docker": "^1.0.0",

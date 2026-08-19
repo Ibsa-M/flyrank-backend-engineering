@@ -27,7 +27,48 @@ const enrichOutputSchema = z.object({
   )
 });
 
+const enrichOutputJsonSchema = {
+  type: 'object',
+  properties: {
+    category: {
+      type: 'string',
+      enum: [
+        'fiction',
+        'nonfiction',
+        'business',
+        'technology',
+        'history',
+        'science',
+        'biography',
+        'poetry',
+        'other'
+      ]
+    },
+    summary: {
+      type: 'string'
+    },
+    quality_flags: {
+      type: 'array',
+      items: {
+        type: 'string',
+        enum: [
+          'missing_description',
+          'weak_description',
+          'uncertain_category'
+        ]
+      }
+    }
+  },
+  required: [
+    'category',
+    'summary',
+    'quality_flags'
+  ],
+  additionalProperties: false
+};
+
 module.exports = {
   enrichInputSchema,
-  enrichOutputSchema
+  enrichOutputSchema,
+  enrichOutputJsonSchema
 };

@@ -1,6 +1,8 @@
 const client = require('./client');
 const { parseJsonOutput } = require('./parser');
 const { writeQuarantineRecord } = require('./quarantine');
+const { withRetry } = require('./retry');
+const { logLlmUsage } = require('./usageLogger');
 
 const {
   enrichOutputSchema,
@@ -15,22 +17,39 @@ const {
 } = require('./prompt');
 
 
-async function callLlm(messages) {
-  const response = await client.chat.completions.create({
-    model: process.env.LLM_MODEL,
-    messages,
+async function callLlm(messages, { repair = false } = {}) {
+  const startedAt = Date.now();
 
-    response_format: {
-      type: 'json_schema',
-      json_schema: {
-        name: 'book_enrichment',
-        strict: true,
-        schema: enrichOutputJsonSchema
-      }
+  const { result } = await withRetry(
+    () =>
+      client.chat.completions.create({
+        model: process.env.LLM_MODEL,
+        messages,
+        response_format: {
+          type: 'json_schema',
+          json_schema: {
+            name: 'book_enrichment',
+            strict: true,
+            schema: enrichOutputJsonSchema
+          }
+        }
+      }),
+    {
+      maxRetries: Number(process.env.LLM_MAX_RETRIES || 2)
     }
+  );
+
+  const durationMs = Date.now() - startedAt;
+
+  logLlmUsage({
+    promptVersion: PROMPT_VERSION,
+    model: process.env.LLM_MODEL,
+    usage: result.usage,
+    durationMs,
+    repair
   });
 
-  const content = response.choices[0]?.message?.content;
+  const content = result.choices[0]?.message?.content;
 
   if (!content) {
     throw new Error('LLM returned empty content');
@@ -39,12 +58,19 @@ async function callLlm(messages) {
   return content;
 }
 
-
 async function enrichBook(input) {
 
   // --------------------------------------------------
   // STUB MODE
   // --------------------------------------------------
+  
+  if (process.env.LLM_ENABLED === 'false') {
+  return {
+    category: 'other',
+    summary: `LLM enrichment disabled for "${input.title}".`,
+    quality_flags: ['llm_disabled']
+  };
+}
 
   if (process.env.LLM_STUB === '1') {
     const result = {
@@ -111,7 +137,7 @@ async function enrichBook(input) {
       }
     ];
 
-    const repairedOutput = await callLlm(repairMessages);
+    const repairedOutput = await callLlm(repairMessages, { repair: true });
 
 
     // ------------------------------------------------

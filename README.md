@@ -127,6 +127,15 @@ first-crud-api/
 ├── README.md
 └── swagger.js
 ```
+## A17 Enrichment API
+
+### Stub mode
+
+Set:
+
+```env
+LLM_STUB=1
+```
 
 ## Swagger UI
 

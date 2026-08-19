@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const supabase = require('./config/supabase');
 const requireAuth = require('./middleware/authMiddleware');
+const enrichRoutes = require('./routes/enrichRoutes');
 app.use(express.json());
 
 const swaggerUi = require("swagger-ui-express");
@@ -11,6 +12,7 @@ const swaggerSpec = require("./swagger");
 const taskRoutes = require('./routes/taskRoutes');
 app.use('/auth', require('./routes/authRoutes'));
 app.use('/tasks', taskRoutes);
+app.use('/enrich', enrichRoutes);
 app.get('/', (req, res) => {
     res.json({
         name: 'Task API',
@@ -18,6 +20,7 @@ app.get('/', (req, res) => {
         endpoints: [
             '/tasks',
             '/auth',
+            '/enrich',
             '/health',
             '/docs'
         ]

@@ -18,3 +18,5 @@ Thumbs.db
 # Coverage
 coverage/
 tasks.db
+
+logs/*.jsonl

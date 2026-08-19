@@ -22,8 +22,29 @@ ${description ?? '[No description available]'}
 `;
 }
 
+function buildRepairPrompt({ originalInput, rawOutput, error }) {
+  return `
+The previous enrichment response was rejected.
+
+Original book:
+Title: ${originalInput.title}
+Description: ${originalInput.description ?? '[No description available]'}
+
+Previous response:
+${rawOutput}
+
+Validation/parsing error:
+${error}
+
+Return ONLY a corrected JSON object matching the required book enrichment schema.
+Do not use Markdown code fences.
+Do not add explanations.
+`;
+}
+
 module.exports = {
   PROMPT_VERSION,
   SYSTEM_PROMPT,
-  buildEnrichmentPrompt
+  buildEnrichmentPrompt,
+  buildRepairPrompt
 };

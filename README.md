@@ -1180,12 +1180,3 @@ The project remains focused on one backend codebase so the progression from one 
 [GitHub — Ibsa-M/flyrank-backend-engineering](https://github.com/Ibsa-M/flyrank-backend-engineering)
 
 
-## Swagger UI
-
-The API documentation is available through Swagger UI at:
-
-`http://localhost:3000/docs`
-
-### Swagger Screenshot
-
-![Swagger UI](docs/swagger-auth.png)

@@ -16,7 +16,6 @@ const {
   buildRepairPrompt
 } = require('./prompt');
 
-
 async function callLlm(messages, { repair = false } = {}) {
   const startedAt = Date.now();
 
@@ -59,18 +58,21 @@ async function callLlm(messages, { repair = false } = {}) {
 }
 
 async function enrichBook(input) {
+  // --------------------------------------------------
+  // KILL SWITCH
+  // --------------------------------------------------
+
+  if (process.env.LLM_ENABLED === 'false') {
+    return {
+      category: 'other',
+      summary: `LLM enrichment disabled for "${input.title}".`,
+      quality_flags: []
+    };
+  }
 
   // --------------------------------------------------
   // STUB MODE
   // --------------------------------------------------
-  
-  if (process.env.LLM_ENABLED === 'false') {
-  return {
-    category: 'other',
-    summary: `LLM enrichment disabled for "${input.title}".`,
-    quality_flags: ['llm_disabled']
-  };
-}
 
   if (process.env.LLM_STUB === '1') {
     const result = {
@@ -83,7 +85,6 @@ async function enrichBook(input) {
 
     return enrichOutputSchema.parse(result);
   }
-
 
   // --------------------------------------------------
   // FIRST LLM ATTEMPT
@@ -110,13 +111,10 @@ async function enrichBook(input) {
     const parsed = parseJsonOutput(rawOutput);
 
     return enrichOutputSchema.parse(parsed);
-
   } catch (firstError) {
-
     console.log(
       'Initial LLM output rejected. Attempting one repair.'
     );
-
 
     // ------------------------------------------------
     // ONE REPAIR ATTEMPT
@@ -137,36 +135,34 @@ async function enrichBook(input) {
       }
     ];
 
-    const repairedOutput = await callLlm(repairMessages, { repair: true });
-
+    const repairedOutput = await callLlm(
+      repairMessages,
+      { repair: true }
+    );
 
     // ------------------------------------------------
     // REPAIR PARSE + VALIDATION
     // ------------------------------------------------
 
     try {
-      const repairedParsed = parseJsonOutput(testRepairedOutput);
+      const repairedParsed = parseJsonOutput(repairedOutput);
 
       return enrichOutputSchema.parse(repairedParsed);
-
     } catch (repairError) {
-
-
       // ----------------------------------------------
       // QUARANTINE
       // ----------------------------------------------
 
       writeQuarantineRecord({
         input,
-        raw_output: testRepairedOutput,
+        raw_output: repairedOutput,
         error: repairError.message,
         prompt_version: PROMPT_VERSION,
         timestamp: new Date().toISOString()
       });
 
-
       // ----------------------------------------------
-      // RETURN CONTROLLED 422 ERROR
+      // CONTROLLED 422 ERROR
       // ----------------------------------------------
 
       const error = new Error(
@@ -179,7 +175,6 @@ async function enrichBook(input) {
     }
   }
 }
-
 
 module.exports = {
   enrichBook

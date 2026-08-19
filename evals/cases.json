@@ -1,0 +1,95 @@
+[
+  {
+    "id": "case-01",
+    "input": {
+      "title": "The Great Gatsby",
+      "description": "A novel about wealth, ambition, and the American dream."
+    },
+    "expected": {
+      "category": "fiction",
+      "required_quality_flags": []
+    }
+  },
+  {
+    "id": "case-02",
+    "input": {
+      "title": "A Beginner's Guide to Business",
+      "description": "An introduction to starting businesses, managing teams, and understanding basic business strategy."
+    },
+    "expected": {
+      "category": "business",
+      "required_quality_flags": []
+    }
+  },
+  {
+    "id": "case-03",
+    "input": {
+      "title": "JavaScript for Web Developers",
+      "description": "A practical guide to JavaScript programming, web development, functions, objects, and browser applications."
+    },
+    "expected": {
+      "category": "technology",
+      "required_quality_flags": []
+    }
+  },
+  {
+    "id": "case-04",
+    "input": {
+      "title": "A Short History of Ancient Rome",
+      "description": "An overview of the political, military, and social development of Rome from its early period through the empire."
+    },
+    "expected": {
+      "category": "history",
+      "required_quality_flags": []
+    }
+  },
+  {
+    "id": "case-05",
+    "input": {
+      "title": "The Life of Ada Lovelace",
+      "description": "A biography describing the life and work of Ada Lovelace and her contributions to early computing."
+    },
+    "expected": {
+      "category": "biography",
+      "required_quality_flags": []
+    }
+  },
+  {
+    "id": "case-06",
+    "input": {
+      "title": "The Great Gatsby",
+      "description": null
+    },
+    "expected": {
+      "category": "other",
+      "required_quality_flags": [
+        "missing_description",
+        "uncertain_category"
+      ]
+    }
+  },
+  {
+    "id": "case-07",
+    "input": {
+      "title": "The Journey",
+      "description": "A story about a person traveling through difficult places while reflecting on life and change."
+    },
+    "expected": {
+      "category": "fiction",
+      "required_quality_flags": []
+    }
+  },
+  {
+    "id": "case-08",
+    "input": {
+      "title": "Untitled Notes",
+      "description": "Important things and various ideas."
+    },
+    "expected": {
+      "category": "other",
+      "required_quality_flags": [
+        "uncertain_category"
+      ]
+    }
+  }
+]
